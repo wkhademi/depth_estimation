@@ -2,12 +2,13 @@ import cv2
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import torchvision.transforms as transforms
 
 from CNN import ShallowNet, DeepNet
 
 
-def SIFT_detector(img, num_keypoints):
-    def select_n_best(keypoints, n=20):
+def SIFT_detector(img, n=20):
+    def select_n_best(keypoints):
         '''
         Select n best (highest response) SIFT keypoints that are not duplicates.
         '''
@@ -30,7 +31,7 @@ def SIFT_detector(img, num_keypoints):
     sift_keypoints = sift.detect(img, None)
 
     # select highest response unique keypoints
-    sift_keypoints = select_n_best(sift_keypoints, n=num_keypoints)
+    sift_keypoints = select_n_best(sift_keypoints)
 
     return sift_keypoints
 
@@ -56,8 +57,8 @@ def detect(img, n=100, detector='SIFT'):
         raise ValueError
 
 
-def extract_patches(img, keypoints, size=32):
-    def get_patches(kps, img, size, num):
+def extract_patches(img, kps, size=32):
+    def get_patches(num):
         res = torch.zeros(num, 1, size, size)
         if type(img) is np.ndarray:
             img = torch.from_numpy(img)
@@ -79,10 +80,25 @@ def extract_patches(img, keypoints, size=32):
         return res
 
     n, _ = keypoints.shape
-    patches = get_patches(keypoints, img, size, n)
+    patches = get_patches(n)
 
     return patches
 
 
-def extract_features():
-    pass
+def extract_features(model, img_patches):
+    B, C, H, W = img_patches.shape
+
+    transform = transforms.Compose([
+            transforms.Normalize((0.443728476019,), (0.20197947209,))])
+
+    img_patches = img_patches.cuda()
+
+    # generate features
+    with torch.no_grad():
+        img_patches = transform(img_patches)
+        img_patch_features = model(img_patches)
+
+    img_patch_features = img_patch_features.view(-1, B, 128).cpu().data
+    img_patch_features img_patch_features.numpy()
+
+    return img_patch_features
