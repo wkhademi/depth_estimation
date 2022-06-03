@@ -1,0 +1,5 @@
+data/
+startup.sh
+CNN1.pth
+checkpoint.pth
+__pycache__/
