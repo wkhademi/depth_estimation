@@ -20,7 +20,7 @@ class DeepNet(nn.Module):
     """DesdNet model definition
     """
     def __init__(self):
-        super(DesNet, self).__init__()
+        super(DeepNet, self).__init__()
         self.features = nn.Sequential(
 
             nn.Conv2d(1, 32, kernel_size=3, padding=1, bias = False),
@@ -70,7 +70,7 @@ class ShallowNet(nn.Module):
     """DesdNet model definition
     """
     def __init__(self):
-        super(DesNet, self).__init__()
+        super(ShallowNet, self).__init__()
         self.features = nn.Sequential(
 
             nn.Conv2d(1, 32, kernel_size=3, stride=2, padding=1, bias = False),

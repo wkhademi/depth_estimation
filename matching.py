@@ -1,3 +1,4 @@
+import cv2
 import scipy
 import numpy as np
 
@@ -9,6 +10,7 @@ def construct_cost_matrix(F_q, F_r):
         F_q_norm = np.linalg.norm(F_q, axis=-1)
         F_r_norm = np.linalg.norm(F_r, axis=-1)
         cos_sim_matrix = (F_q @ F_r.T) / np.outer(F_q_norm, F_r_norm)
+        cos_sim_matrix = np.clip(cos_sim_matrix, -1., 1.)
 
         S = 0.5 * (1 + cos_sim_matrix)
 
@@ -27,7 +29,7 @@ def one2one_matching(C):
     return X
 
 
-def find_matches(F_q, F_r):
+def find_keypoint_matches(F_q, F_r):
     C = construct_cost_matrix(F_q, F_r)
     X = one2one_matching(C)  # compute one to one matchings
 
@@ -36,23 +38,18 @@ def find_matches(F_q, F_r):
 
 def select_n_best_matches(img1_keypoints, img2_keypoints, C, X, n=50):
     match_costs = C * X
-    threshold = np.sort(np.sum(match_costs, axis=-1))[n]
-    match_costs[match_costs == 0] = np.inf
-    best_n_ids = np.argwhere(match_costs < threshold)
+    threshold = np.sort(np.sum(match_costs, axis=-1))[n-1]
+    criteria = np.logical_and(match_costs <= threshold, X != 0)
+    best_n_ids = np.argwhere(criteria)
 
-    print(threshold)
-    print(best_n_ids.shape)
+    p_ids = best_n_ids[:,0]
+    p = img1_keypoints[p_ids]
 
-    #points1_ids = best_50_ids[:,:,:2].reshape(-1, 2)
-    #points1 = imgs1_keypoints[points1_ids[:,0], points1_ids[:,1]].reshape(7, 50, 2)
+    q_ids = best_n_ids[:,1]
+    q = img2_keypoints[q_ids]
 
-    #points2_ids = best_50_ids[:,:,::2].reshape(-1, 2)
-    #points2 = imgs2_keypoints[points2_ids[:,0], points2_ids[:,1]].reshape(7, 50, 2)
+    return p, q
 
-    #print(points1.shape)
-    #print(points2.shape)
 
-    points1 = None
-    points2 = None
-
-    return points1, points2
+def stereo_matching():
+    pass

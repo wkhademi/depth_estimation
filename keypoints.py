@@ -9,9 +9,6 @@ from CNN import ShallowNet, DeepNet
 
 def SIFT_detector(img, n=20):
     def select_n_best(keypoints):
-        '''
-        Select n best (highest response) SIFT keypoints that are not duplicates.
-        '''
         keypoint_response = np.array([keypoint.response for keypoint in keypoints])
         keypoints, unique_keypoints_id = np.unique([keypoint.pt for keypoint in keypoints], return_index=True, axis=0)
         keypoint_response = keypoint_response[unique_keypoints_id]
@@ -20,7 +17,7 @@ def SIFT_detector(img, n=20):
         keypoints = keypoints[response_order]
         keypoint_response = keypoint_response[response_order]
 
-        best_keypoints = keypoints[:n].astype(np.int32)
+        best_keypoints = keypoints[:n]
 
         return best_keypoints
 
@@ -43,7 +40,7 @@ def Harris_detector(img, num_keypoints):
     # adaptive thresholding
     threshold = np.sort(harris_keypoints, axis=None)[-num_keypoints]
     harris_keypoints = np.argwhere(harris_keypoints >= threshold)
-    harris_keypoints = np.flip(harris_keypoints, axis=-1).astype(np.int32)
+    harris_keypoints = np.flip(harris_keypoints, axis=-1)
 
     return harris_keypoints
 
@@ -59,6 +56,8 @@ def detect(img, n=100, detector='SIFT'):
 
 def extract_patches(img, kps, size=32):
     def get_patches(num):
+        nonlocal img
+
         res = torch.zeros(num, 1, size, size)
         if type(img) is np.ndarray:
             img = torch.from_numpy(img)
@@ -79,7 +78,7 @@ def extract_patches(img, kps, size=32):
 
         return res
 
-    n, _ = keypoints.shape
+    n, _ = kps.shape
     patches = get_patches(n)
 
     return patches
@@ -98,7 +97,7 @@ def extract_features(model, img_patches):
         img_patches = transform(img_patches)
         img_patch_features = model(img_patches)
 
-    img_patch_features = img_patch_features.view(-1, B, 128).cpu().data
-    img_patch_features img_patch_features.numpy()
+    img_patch_features = img_patch_features.view(B, 128).cpu().data
+    img_patch_features = img_patch_features.numpy()
 
     return img_patch_features
