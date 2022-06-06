@@ -40,9 +40,7 @@ def compute_epipoles(F):
     return e1, e2
 
 
-def rectify(img1, p, img2, q, F, inlier_mask):
-    h, w = img1.shape
-
+def rectify(img1, p, img2, q, F, inlier_mask, h, w):
     p = p[inlier_mask.ravel() == 1]
     q = q[inlier_mask.ravel() == 1]
 
