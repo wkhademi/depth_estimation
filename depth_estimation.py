@@ -33,7 +33,7 @@ def main():
     if args.full_pipeline:
         avg_aae = []
         avg_rmse = []
-        avg_bad2 = []
+        avg_bad4 = []
         times = []
 
         # build CNN model
@@ -92,29 +92,23 @@ def main():
             left_disp = cv2.warpPerspective(left_disp, np.linalg.inv(H1), (w, h))
             right_disp = cv2.warpPerspective(right_disp, np.linalg.inv(H2), (w, h))
 
-            plt.imshow(left_disp, vmin=vmin, vmax=vmax)
-            plt.savefig('data/%s/%s/%s_%s%s_left_disp.png'%(args.dataset, scene_name, args.detector, args.stereo_matching, args.window_size), bbox_inches='tight')
-
-            plt.imshow(right_disp, vmin=vmin, vmax=vmax)
-            plt.savefig('data/%s/%s/%s_%s%s_right_disp.png'%(args.dataset, scene_name, args.detector, args.stereo_matching, args.window_size), bbox_inches='tight')
-
             # compute evaluation metrics
             aae = 0.5 * (metrics.AAE(left_gt_disp, left_disp) + metrics.AAE(right_gt_disp, right_disp))
             rmse = 0.5 * (metrics.RMSE(left_gt_disp, left_disp) + metrics.RMSE(right_gt_disp, right_disp))
-            bad2 = 0.5 * (metrics.percent_bad_pixels(left_gt_disp, left_disp) + metrics.percent_bad_pixels(right_gt_disp, right_disp))
+            bad4 = 0.5 * (metrics.percent_bad_pixels(left_gt_disp, left_disp) + metrics.percent_bad_pixels(right_gt_disp, right_disp))
 
             avg_aae.append(aae)
             avg_rmse.append(rmse)
-            avg_bad2.append(bad2)
+            avg_bad4.append(bad4)
 
         print('Average Runtime: %.2f'%np.mean(times))
         print('Absolute Average Error: %f'%np.mean(avg_aae))
         print('Root-Mean-Square Error: %f'%np.mean(avg_rmse))
-        print('Bad2.0: %f'%np.mean(avg_bad2))
+        print('Bad4.0: %f'%np.mean(avg_bad4))
     else:  # just do stereo matching
         avg_aae = []
         avg_rmse = []
-        avg_bad2 = []
+        avg_bad4 = []
         times = []
 
         for data in dataloader:
@@ -129,24 +123,18 @@ def main():
 
             times.append(time.time() - start_time)
 
-            plt.imshow(img1)
-            plt.savefig('data/%s/%s/left.png'%(args.dataset, scene_name), bbox_inches='tight')
-
-            plt.imshow(img2)
-            plt.savefig('data/%s/%s/right.png'%(args.dataset, scene_name), bbox_inches='tight')
-
             aae = 0.5 * (metrics.AAE(left_gt_disp, left_disp) + metrics.AAE(right_gt_disp, right_disp))
             rmse = 0.5 * (metrics.RMSE(left_gt_disp, left_disp) + metrics.RMSE(right_gt_disp, right_disp))
-            bad2 = 0.5 * (metrics.percent_bad_pixels(left_gt_disp, left_disp) + metrics.percent_bad_pixels(right_gt_disp, right_disp))
+            bad4 = 0.5 * (metrics.percent_bad_pixels(left_gt_disp, left_disp) + metrics.percent_bad_pixels(right_gt_disp, right_disp))
 
             avg_aae.append(aae)
             avg_rmse.append(rmse)
-            avg_bad2.append(bad2)
+            avg_bad4.append(bad4)
 
         print('Average Runtime: %.2f'%np.mean(times))
         print('Absolute Average Error: %f'%np.mean(avg_aae))
         print('Root-Mean-Square Error: %f'%np.mean(avg_rmse))
-        print('Bad2.0: %f'%np.mean(avg_bad2))
+        print('Bad4.0: %f'%np.mean(avg_bad4))
 
 if __name__ == '__main__':
     main()
