@@ -45,7 +45,7 @@ class DatasetIterator:
             right_disp_path = os.path.join(scene_path, 'disp1.pfm')
             right_disp = np.flip(loader.load_pfm(right_disp_path), axis=0)
 
-            ndisp = int(calib_dict['ndisp'])
+            ndisp = (int(calib_dict['ndisp']) // 16) * 16
             vmin = int(calib_dict['vmin'])
             vmax = int(calib_dict['vmax'])
 
